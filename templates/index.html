@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Job Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Color Variables */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #fca311;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--success));
+            border-radius: 2px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Form Grid Layout */
+        .form-grid {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .form-column {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="hidden"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 15px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        textarea {
+            min-height: 80px;
+        }
+
+        /* Toggle Switch for Binary Inputs */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .toggle-label {
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--success);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            text-align: center;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        button {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Form Section Styling */
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Result Display */
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-real {
+            background-color: rgba(76, 201, 240, 0.2);
+            border: 2px solid var(--success);
+        }
+
+        .result-fake {
+            background-color: rgba(252, 163, 17, 0.2);
+            border: 2px solid var(--warning);
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .result-confidence {
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .container {
+                padding: 25px;
+                margin: 20px auto;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Fake Job Posting Detector</h1>
+            <p class="subtitle">Protect yourself from employment scams. Our AI-powered system analyzes job postings to identify potential fraud.</p>
+        </div>
+
+        <form id="jobForm" action="/predict" method="post">
+            <div class="form-grid">
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-briefcase"></i> Job Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="title"><i class="fas fa-heading"></i> Job Title *</label>
+                            <input type="text" id="title" name="title" required placeholder="e.g. Software Engineer">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
+                            <input type="text" id="location" name="location" placeholder="e.g. New York, NY">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department"><i class="fas fa-building"></i> Department</label>
+                            <input type="text" id="department" name="department" placeholder="e.g. Engineering">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="salary_range"><i class="fas fa-money-bill-wave"></i> Salary Range</label>
+                            <input type="text" id="salary_range" name="salary_range" placeholder="e.g. $80,000 - $100,000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employment_type"><i class="fas fa-clock"></i> Employment Type</label>
+                            <select id="employment_type" name="employment_type">
+                                <option value="">Select employment type</option>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Temporary">Temporary</option>
+                                <option value="Internship">Internship</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-graduation-cap"></i> Requirements</h3>
+                        
+                        <div class="form-group">
+                            <label for="required_experience"><i class="fas fa-chart-line"></i> Required Experience</label>
+                            <input type="text" id="required_experience" name="required_experience" placeholder="e.g. 5+ years">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="required_education"><i class="fas fa-university"></i> Required Education</label>
+                            <input type="text" id="required_education" name="required_education" placeholder="e.g. Bachelor's Degree">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-industry"></i> Company Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="industry"><i class="fas fa-globe"></i> Industry</label>
+                            <input type="text" id="industry" name="industry" placeholder="e.g. Technology">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="function"><i class="fas fa-cogs"></i> Function</label>
+                            <input type="text" id="function" name="function" placeholder="e.g. Software Development">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_profile"><i class="fas fa-info-circle"></i> Company Profile</label>
+                            <textarea id="company_profile" name="company_profile" rows="3" placeholder="Brief description of the company"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-file-alt"></i> Job Content</h3>
+                        
+                        <div class="form-group">
+                            <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                            <textarea id="description" name="description" rows="4" placeholder="Detailed job description"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="requirements"><i class="fas fa-tasks"></i> Requirements</label>
+                            <textarea id="requirements" name="requirements" rows="4" placeholder="Job requirements and qualifications"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="benefits"><i class="fas fa-gift"></i> Benefits</label>
+                            <textarea id="benefits" name="benefits" rows="3" placeholder="Compensation and benefits"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-check-circle"></i> Verification Flags</h3>
+                        
+                        <div class="form-group">
+                            <label><i class="fas fa-laptop-house"></i> Telecommuting</label>
+                            <div class="toggle-group">
+                                <span class="toggle-label">No</span>
+                                <label class="toggle-switch">
+                                    <!-- Hidden input ensures value is always sent -->
+                                    <input type="hidden" name="telecommuting" value="0">
+                                    <input type="checkbox" name="telecommuting" value="1">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Yes</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-image"></i> Has Company Logo</label>
+                            <div class="toggle-group">
+                                <span class="toggle-label">No</span>
+                                <label class="toggle-switch">
+                                    <input type="hidden" name="has_company_logo" value="0">
+                                    <input type="checkbox" name="has_company_logo" value="1">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Yes</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-question-circle"></i> Has Questions</label>
+                            <div class="toggle-group">
+                                <span class="toggle-label">No</span>
+                                <label class="toggle-switch">
+                                    <input type="hidden" name="has_questions" value="0">
+                                    <input type="checkbox" name="has_questions" value="1">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Yes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-btn">
+                <button type="submit"><i class="fas fa-search"></i> Analyze Job Posting</button>
+            </div>
+        </form>
+
+        <!-- Result Display Area -->
+        <div id="resultContainer" class="result-container">
+            <h2 class="result-title"><i class="fas fa-check-circle"></i> <span id="resultText">Analysis Complete</span></h2>
+            <p id="resultDescription">Our analysis of this job posting is complete.</p>
+            <p class="result-confidence">Confidence: <span id="confidenceValue">92%</span></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('jobForm');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultText = document.getElementById('resultText');
+            const resultDescription = document.getElementById('resultDescription');
+            const confidenceValue = document.getElementById('confidenceValue');
+            
+           
+            const setupToggle = (checkboxName) => {
+                const checkbox = document.querySelector(input[type="checkbox"][name="${checkboxName}"]);
+                const hidden = document.querySelector(input[type="hidden"][name="${checkboxName}"]);
+                
+                if (checkbox && hidden) {
+                    checkbox.addEventListener('change', function() {
+                        hidden.value = this.checked ? '1' : '0';
+                    });
+                }
+            };
+            
+            // Set up all toggles
+            setupToggle('telecommuting');
+            setupToggle('has_company_logo');
+            setupToggle('has_questions');
+            
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let valid = true;
+                const requiredFields = form.querySelectorAll('[required]');
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        valid = false;
+                        field.style.borderColor = 'red';
+                    } else {
+                        field.style.borderColor = '';
+                    }
+                });
+                
+                if (!valid) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+                
+                // Simulate form submission and result (replace with actual AJAX call)
+                simulateAnalysis();
+            });
+            
+            // Simulate analysis (replace with actual AJAX call to your Flask backend)
+            function simulateAnalysis() {
+                // Show loading state
+                resultContainer.style.display = 'block';
+                resultContainer.className = 'result-container';
+                resultText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                resultDescription.textContent = 'Please wait while we analyze the job posting.';
+                confidenceValue.textContent = '0%';
+                
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Random result for demonstration
+                    const isReal = Math.random() > 0.5;
+                    
+                    if (isReal) {
+                        resultContainer.classList.add('result-real');
+                        resultText.innerHTML = '<i class="fas fa-check-circle"></i> Likely Real Job';
+                        resultDescription.textContent = 'This job posting appears to be legitimate based on our analysis.';
+                    } else {
+                        resultContainer.classList.add('result-fake');
+                        resultText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Potential Fake Job';
+                        resultDescription.textContent = 'This job posting shows several characteristics of fraudulent listings.';
+                    }
+                    
+                    confidenceValue.textContent = Math.floor(Math.random() * 30 + 70) + '%';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
